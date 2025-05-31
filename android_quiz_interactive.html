@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Android Interactif</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .quiz-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            margin: 20px 0;
+        }
+        
+        .question-card {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .question-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .option-btn {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+        
+        .option-btn:hover {
+            background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+            transform: translateX(10px);
+        }
+        
+        .option-btn.selected {
+            background: linear-gradient(145deg, #2196f3, #1976d2);
+            color: white;
+            border-color: #0d47a1;
+        }
+        
+        .option-btn.correct {
+            background: linear-gradient(145deg, #4caf50, #388e3c);
+            color: white;
+            border-color: #2e7d32;
+        }
+        
+        .option-btn.incorrect {
+            background: linear-gradient(145deg, #f44336, #d32f2f);
+            color: white;
+            border-color: #c62828;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .score-badge {
+            background: linear-gradient(145deg, #ff9800, #f57c00);
+            color: white;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255,152,0,0.3);
+        }
+        
+        .section-badge {
+            background: linear-gradient(145deg, #9c27b0, #7b1fa2);
+            color: white;
+            border-radius: 20px;
+            padding: 5px 15px;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(145deg, #2196f3, #1976d2);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(145deg, #1976d2, #0d47a1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(33,150,243,0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(145deg, #4caf50, #388e3c);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: bold;
+        }
+        
+        .final-score {
+            background: linear-gradient(145deg, #ff5722, #d84315);
+            color: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(255,87,34,0.3);
+        }
+        
+        .android-icon {
+            color: #a4c639;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        
+        .timer {
+            background: linear-gradient(145deg, #ff5722, #d84315);
+            color: white;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="quiz-container p-4 mt-4">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <i class="fab fa-android android-icon"></i>
+                <h1 class="display-4 fw-bold text-primary mb-3">Quiz Android Interactif</h1>
+                <p class="lead text-muted">Testez vos connaissances en développement Android</p>
+            </div>
+            
+            <!-- Start Screen -->
+            <div id="startScreen" class="text-center">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card question-card p-4">
+                            <h3 class="mb-4">Prêt à commencer ?</h3>
+                            <p class="mb-4">Ce quiz contient 100 questions sur Android réparties en 5 sections :</p>
+                            <ul class="list-unstyled mb-4">
+                                <li><span class="section-badge">Bases d'Android</span></li>
+                                <li><span class="section-badge">Interface Utilisateur</span></li>
+                                <li><span class="section-badge">Gestion des Données</span></li>
+                                <li><span class="section-badge">Services et Composants</span></li>
+                                <li><span class="section-badge">Avancé et Optimisation</span></li>
+                            </ul>
+                            <button class="btn btn-primary btn-lg" onclick="startQuiz()">
+                                <i class="fas fa-play me-2"></i>Commencer le Quiz
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quiz Screen -->
+            <div id="quizScreen" style="display: none;">
+                <!-- Progress and Info -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="progress" style="height: 25px;">
+                            <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%">
+                                <span id="progressText">Question 1/100</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span id="scoreDisplay" class="score-badge">Score: 0/0</span>
+                    </div>
+                </div>
+                
+                <!-- Current Section -->
+                <div class="text-center mb-3">
+                    <span id="currentSection" class="section-badge">Section 1: Bases d'Android</span>
+                </div>
+                
+                <!-- Question Card -->
+                <div class="card question-card p-4 mb-4">
+                    <h4 id="questionNumber" class="text-primary mb-3">Question 1</h4>
+                    <h5 id="questionText" class="mb-4"></h5>
+                    <div id="optionsContainer"></div>
+                </div>
+                
+                <!-- Navigation -->
+                <div class="text-center">
+                    <button id="prevBtn" class="btn btn-outline-secondary me-3" onclick="previousQuestion()" disabled>
+                        <i class="fas fa-chevron-left me-2"></i>Précédent
+                    </button>
+                    <button id="nextBtn" class="btn btn-primary" onclick="nextQuestion()" disabled>
+                        Suivant<i class="fas fa-chevron-right ms-2"></i>
+                    </button>
+                    <button id="finishBtn" class="btn btn-success" onclick="finishQuiz()" style="display: none;">
+                        <i class="fas fa-flag-checkered me-2"></i>Terminer
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Results Screen -->
+            <div id="resultsScreen" style="display: none;">
+                <div class="text-center">
+                    <div class="final-score">
+                        <i class="fas fa-trophy mb-3" style="font-size: 3em;"></i>
+                        <h2>Quiz Terminé !</h2>
+                        <h3 id="finalScore" class="mb-3"></h3>
+                        <p id="levelMessage" class="mb-4"></p>
+                        <div class="row mt-4">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h5 id="section1Score">0/20</h5>
+                                    <small>Bases d'Android</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h5 id="section2Score">0/20</h5>
+                                    <small>Interface UI</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h5 id="section3Score">0/20</h5>
+                                    <small>Gestion Données</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h5 id="section4Score">0/20</h5>
+                                    <small>Services</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <div class="text-center">
+                                    <h5 id="section5Score">0/20</h5>
+                                    <small>Avancé</small>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-light btn-lg mt-4" onclick="restartQuiz()">
+                            <i class="fas fa-redo me-2"></i>Recommencer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const questions = [
+            // Section 1: Bases d'Android (1-20)
+            {q: "Quel langage de programmation était principalement utilisé pour développer des applications Android avant Kotlin ?", o: ["C++", "Java", "Python", "Swift"], a: 1, s: 1},
+            {q: "Qu'est-ce qu'une Activity en Android ?", o: ["Un service en arrière-plan", "Une interface utilisateur unique", "Une base de données", "Un fichier de configuration"], a: 1, s: 1},
+            {q: "Quel fichier contient les métadonnées de l'application Android ?", o: ["build.gradle", "MainActivity.java", "AndroidManifest.xml", "strings.xml"], a: 2, s: 1},
+            {q: "Quelle méthode est appelée en premier dans le cycle de vie d'une Activity ?", o: ["onCreate()", "onStart()", "onResume()", "onPause()"], a: 0, s: 1},
+            {q: "Quel est l'IDE officiel pour le développement Android ?", o: ["Eclipse", "IntelliJ IDEA", "Android Studio", "Visual Studio"], a: 2, s: 1},
+            {q: "Qu'est-ce qu'un Intent en Android ?", o: ["Une base de données", "Un message pour communiquer entre composants", "Une interface utilisateur", "Un fichier de ressources"], a: 1, s: 1},
+            {q: "Dans quel dossier sont stockées les images dans un projet Android ?", o: ["assets/", "drawable/", "values/", "layout/"], a: 1, s: 1},
+            {q: "Quelle méthode permet de trouver une vue par son ID ?", o: ["getView()", "findViewById()", "findView()", "getViewById()"], a: 1, s: 1},
+            {q: "Quel format de fichier est utilisé pour définir les layouts ?", o: ["JSON", "HTML", "XML", "YAML"], a: 2, s: 1},
+            {q: "Qu'est-ce qu'un Fragment ?", o: ["Une partie d'une Activity", "Un service", "Une base de données", "Un fichier de configuration"], a: 0, s: 1},
+            {q: "Quelle permission est nécessaire pour accéder à Internet ?", o: ["INTERNET", "NETWORK_ACCESS", "WEB_ACCESS", "ONLINE_ACCESS"], a: 0, s: 1},
+            {q: "Quel composant permet d'exécuter des tâches en arrière-plan ?", o: ["Activity", "Fragment", "Service", "Intent"], a: 2, s: 1},
+            {q: "Comment appelle-t-on le processus de signature d'une application Android ?", o: ["Compilation", "Signing", "Building", "Packaging"], a: 1, s: 1},
+            {q: "Quel est le format de fichier d'une application Android ?", o: [".exe", ".apk", ".app", ".jar"], a: 1, s: 1},
+            {q: "Quelle classe hérite généralement une Activity ?", o: ["AppCompatActivity", "BaseActivity", "MainActivity", "AndroidActivity"], a: 0, s: 1},
+            {q: "Où sont stockées les chaînes de caractères dans un projet Android ?", o: ["strings.xml", "text.xml", "values.xml", "content.xml"], a: 0, s: 1},
+            {q: "Quelle méthode est appelée quand une Activity devient visible ?", o: ["onCreate()", "onStart()", "onResume()", "onVisible()"], a: 1, s: 1},
+            {q: "Qu'est-ce qu'un BroadcastReceiver ?", o: ["Un composant qui reçoit des messages système", "Une interface utilisateur", "Un service réseau", "Une base de données"], a: 0, s: 1},
+            {q: "Quel outil est utilisé pour déboguer les applications Android ?", o: ["Monitor", "Debugger", "ADB (Android Debug Bridge)", "Inspector"], a: 2, s: 1},
+            {q: "Quelle version d'Android a introduit les Fragments ?", o: ["Android 2.3", "Android 3.0", "Android 4.0", "Android 2.2"], a: 1, s: 1},
+            
+            // Section 2: Interface Utilisateur (21-40)
+            {q: "Quel layout arrange les vues en ligne ou en colonne ?", o: ["RelativeLayout", "LinearLayout", "FrameLayout", "TableLayout"], a: 1, s: 2},
+            {q: "Quelle propriété définit l'orientation d'un LinearLayout ?", o: ["android:direction", "android:orientation", "android:layout_direction", "android:align"], a: 1, s: 2},
+            {q: "Quel composant affiche une liste d'éléments déroulante ?", o: ["ListView", "ScrollView", "RecyclerView", "GridView"], a: 0, s: 2},
+            {q: "Quelle classe est recommandée pour afficher de grandes listes ?", o: ["ListView", "RecyclerView", "ScrollView", "GridView"], a: 1, s: 2},
+            {q: "Quel attribut définit la largeur d'une vue ?", o: ["android:width", "android:layout_width", "android:size_width", "android:w"], a: 1, s: 2},
+            {q: "Que signifie \"wrap_content\" ?", o: ["Prendre toute la place disponible", "S'adapter au contenu", "Taille fixe", "Taille relative"], a: 1, s: 2},
+            {q: "Quel composant permet de saisir du texte ?", o: ["TextView", "EditText", "InputText", "TextInput"], a: 1, s: 2},
+            {q: "Comment créer un bouton cliquable ?", o: ["TextView", "Button", "ClickableText", "ActionButton"], a: 1, s: 2},
+            {q: "Quel layout permet de superposer des vues ?", o: ["LinearLayout", "RelativeLayout", "FrameLayout", "GridLayout"], a: 2, s: 2},
+            {q: "Comment afficher une image ?", o: ["TextView", "ImageView", "PictureView", "PhotoView"], a: 1, s: 2},
+            {q: "Quel composant affiche une barre de progression ?", o: ["ProgressBar", "LoadingBar", "StatusBar", "WaitBar"], a: 0, s: 2},
+            {q: "Comment créer une case à cocher ?", o: ["CheckBox", "TickBox", "SelectBox", "ChoiceBox"], a: 0, s: 2},
+            {q: "Quel layout permet un positionnement relatif ?", o: ["LinearLayout", "RelativeLayout", "FrameLayout", "AbsoluteLayout"], a: 1, s: 2},
+            {q: "Comment afficher un menu déroulant ?", o: ["DropdownMenu", "Spinner", "SelectMenu", "ChoiceMenu"], a: 1, s: 2},
+            {q: "Quel attribut centre une vue horizontalement ?", o: ["android:gravity=\"center\"", "android:layout_centerHorizontal=\"true\"", "android:center=\"horizontal\"", "android:align=\"center\""], a: 1, s: 2},
+            {q: "Comment créer des onglets ?", o: ["TabLayout", "TabHost", "TabView", "TabContainer"], a: 0, s: 2},
+            {q: "Quel composant permet de faire défiler le contenu ?", o: ["ScrollView", "SlideView", "MoveView", "PanView"], a: 0, s: 2},
+            {q: "Comment afficher une alerte ?", o: ["AlertBox", "AlertDialog", "MessageBox", "NotificationBox"], a: 1, s: 2},
+            {q: "Quel layout organise les vues en grille ?", o: ["GridLayout", "TableLayout", "GridView", "MatrixLayout"], a: 0, s: 2},
+            {q: "Comment masquer une vue ?", o: ["android:visible=\"false\"", "android:visibility=\"gone\"", "android:display=\"none\"", "android:show=\"false\""], a: 1, s: 2},
+            
+            // Section 3: Gestion des Données (41-60)
+            {q: "Quelle base de données est intégrée à Android ?", o: ["MySQL", "SQLite", "PostgreSQL", "MongoDB"], a: 1, s: 3},
+            {q: "Quelle classe aide à gérer la base de données ?", o: ["DatabaseHelper", "SQLiteOpenHelper", "DBHelper", "DataManager"], a: 1, s: 3},
+            {q: "Comment stocker des préférences simples ?", o: ["SharedPreferences", "PreferenceStorage", "SettingsStorage", "ConfigStorage"], a: 0, s: 3},
+            {q: "Quel format est couramment utilisé pour échanger des données ?", o: ["XML", "JSON", "CSV", "TXT"], a: 1, s: 3},
+            {q: "Comment lire un fichier depuis les assets ?", o: ["AssetManager", "FileReader", "AssetReader", "ResourceReader"], a: 0, s: 3},
+            {q: "Quelle méthode insère des données dans SQLite ?", o: ["add()", "insert()", "save()", "store()"], a: 1, s: 3},
+            {q: "Comment exécuter une requête de lecture ?", o: ["query()", "select()", "read()", "fetch()"], a: 0, s: 3},
+            {q: "Quel objet contient les résultats d'une requête SQLite ?", o: ["ResultSet", "Cursor", "DataSet", "QueryResult"], a: 1, s: 3},
+            {q: "Comment stocker des données dans le stockage interne ?", o: ["InternalStorage", "FileOutputStream", "DataStorage", "PrivateStorage"], a: 1, s: 3},
+            {q: "Quelle permission est nécessaire pour écrire sur le stockage externe ?", o: ["WRITE_STORAGE", "WRITE_EXTERNAL_STORAGE", "EXTERNAL_WRITE", "STORAGE_WRITE"], a: 1, s: 3},
+            {q: "Comment parser du JSON en Android ?", o: ["JSONParser", "JSONObject", "JsonReader", "DataParser"], a: 1, s: 3},
+            {q: "Quelle classe gère les requêtes HTTP ?", o: ["HttpURLConnection", "NetworkConnection", "WebConnection", "InternetConnection"], a: 0, s: 3},
+            {q: "Comment sauvegarder l'état d'une Activity ?", o: ["onSave()", "onSaveInstanceState()", "saveState()", "storeState()"], a: 1, s: 3},
+            {q: "Quel est le stockage le plus rapide ?", o: ["SQLite", "SharedPreferences", "Fichiers", "Réseau"], a: 1, s: 3},
+            {q: "Comment créer une table SQLite ?", o: ["CREATE TABLE", "NEW TABLE", "ADD TABLE", "MAKE TABLE"], a: 0, s: 3},
+            {q: "Quelle méthode met à jour des données ?", o: ["modify()", "update()", "change()", "edit()"], a: 1, s: 3},
+            {q: "Comment supprimer des données ?", o: ["remove()", "delete()", "erase()", "clear()"], a: 1, s: 3},
+            {q: "Quel pattern est recommandé pour la gestion des données ?", o: ["MVC", "MVP", "MVVM", "Repository Pattern"], a: 3, s: 3},
+            {q: "Comment vérifier la connectivité réseau ?", o: ["NetworkManager", "ConnectivityManager", "InternetManager", "ConnectionChecker"], a: 1, s: 3},
+            {q: "Quelle librairie est populaire pour les requêtes réseau ?", o: ["Volley", "NetworkLib", "HttpLib", "WebLib"], a: 0, s: 3},
+            
+            // Section 4: Services et Composants (61-80)
+            {q: "Combien de types de Services existe-t-il ?", o: ["2", "3", "4", "5"], a: 1, s: 4},
+            {q: "Quel type de Service continue à fonctionner même si l'app est fermée ?", o: ["Started Service", "Bound Service", "Intent Service", "Background Service"], a: 0, s: 4},
+            {q: "Comment démarrer un Service ?", o: ["startService()", "beginService()", "runService()", "launchService()"], a: 0, s: 4},
+            {q: "Quel Service s'arrête automatiquement après sa tâche ?", o: ["AutoService", "IntentService", "TaskService", "WorkService"], a: 1, s: 4},
+            {q: "Comment arrêter un Service ?", o: ["endService()", "stopService()", "killService()", "terminateService()"], a: 1, s: 4},
+            {q: "Qu'est-ce qu'un ContentProvider ?", o: ["Un fournisseur de contenu partagé", "Un gestionnaire de médias", "Un service de notification", "Un composant d'interface"], a: 0, s: 4},
+            {q: "Comment accéder aux contacts du téléphone ?", o: ["ContactManager", "ContactsContract", "PhoneContacts", "AddressBook"], a: 1, s: 4},
+            {q: "Quel composant gère les notifications ?", o: ["NotificationManager", "AlertManager", "MessageManager", "InfoManager"], a: 0, s: 4},
+            {q: "Comment créer une notification ?", o: ["Notification.Builder", "NotificationCompat.Builder", "AlertBuilder", "MessageBuilder"], a: 1, s: 4},
+            {q: "Quel canal est nécessaire pour les notifications (Android 8+) ?", o: ["NotificationChannel", "MessageChannel", "AlertChannel", "InfoChannel"], a: 0, s: 4},
+            {q: "Comment programmer une tâche récurrente ?", o: ["Timer", "AlarmManager", "ScheduleManager", "TaskManager"], a: 1, s: 4},
+            {q: "Quel composant détecte les changements système ?", o: ["SystemReceiver", "BroadcastReceiver", "EventReceiver", "ChangeReceiver"], a: 1, s: 4},
+            {q: "Comment enregistrer un BroadcastReceiver dynamiquement ?", o: ["addReceiver()", "registerReceiver()", "setReceiver()", "bindReceiver()"], a: 1, s: 4},
+            {q: "Quel Intent démarre l'appareil photo ?", o: ["MediaStore.ACTION_IMAGE_CAPTURE", "Camera.ACTION_CAPTURE", "Photo.ACTION_TAKE", "Image.ACTION_CAMERA"], a: 0, s: 4},
+            {q: "Comment partager du contenu avec d'autres apps ?", o: ["Share Intent", "ACTION_SEND", "Content Intent", "Transfer Intent"], a: 1, s: 4},
+            {q: "Quel composant gère les jobs en arrière-plan (Android 5+) ?", o: ["JobManager", "JobScheduler", "TaskScheduler", "WorkManager"], a: 1, s: 4},
+            {q: "Comment détecter les changements de connectivité ?", o: ["CONNECTIVITY_ACTION", "NETWORK_STATE_CHANGED_ACTION", "CONNECTION_CHANGED", "WIFI_STATE_CHANGED_ACTION"], a: 0, s: 4},
+            {q: "Quel composant remplace AsyncTask (déprécié) ?", o: ["ThreadManager", "ExecutorService", "TaskRunner", "BackgroundTask"], a: 1, s: 4},
+            {q: "Comment lier un Service à une Activity ?", o: ["connectService()", "bindService()", "linkService()", "attachService()"], a: 1, s: 4},
+            {q: "Quelle interface implémente un Service lié ?", o: ["ServiceConnection", "IBinder", "ServiceBinder", "BoundInterface"], a: 1, s: 4},
+            
+            // Section 5: Avancé et Optimisation (81-100)
+            {q: "Qu'est-ce que l'ANR ?", o: ["Android Native Runtime", "Application Not Responding", "Android Network Request", "Application Native Resource"], a: 1, s: 5},
+            {q: "Sur quel thread s'exécute l'interface utilisateur ?", o: ["Background Thread", "Main Thread/UI Thread", "Worker Thread", "Service Thread"], a: 1, s: 5},
+            {q: "Comment exécuter du code sur le thread principal ?", o: ["runOnMainThread()", "runOnUiThread()", "executeOnMain()", "postOnMain()"], a: 1, s: 5},
+            {q: "Quel outil analyse les performances mémoire ?", o: ["Memory Monitor", "Heap Analyzer", "Memory Profiler", "RAM Checker"], a: 2, s: 5},
+            {q: "Qu'est-ce qu'une fuite mémoire ?", o: ["Mémoire libérée trop tôt", "Mémoire non libérée", "Mémoire corrompue", "Mémoire insuffisante"], a: 1, s: 5},
+            {q: "Comment optimiser les images ?", o: ["Les compresser", "Utiliser des formats adaptés", "Les redimensionner", "Toutes les réponses"], a: 3, s: 5},
+            {q: "Qu'est-ce que Proguard ?", o: ["Un débogueur", "Un obfuscateur de code", "Un émulateur", "Un compilateur"], a: 1, s: 5},
+            {q: "Quel pattern évite les fuites mémoire avec les AsyncTask ?", o: ["WeakReference", "SoftReference", "StrongReference", "PhantomReference"], a: 0, s: 5},
+            {q: "Comment tester les performances réseau ?", o: ["Network Monitor", "Network Profiler", "Connection Tester", "Bandwidth Analyzer"], a: 1, s: 5},
+            {q: "Qu'est-ce que le ViewHolder pattern ?", o: ["Une technique d'optimisation des listes", "Un pattern de navigation", "Une méthode de stockage", "Un gestionnaire de vues"], a: 0, s: 5},
+            {q: "Comment réduire la taille de l'APK ?", o: ["Utiliser Proguard", "Optimiser les ressources", "Supprimer le code inutile", "Toutes les réponses"], a: 3, s: 5},
+            {q: "Qu'est-ce que le Lazy Loading ?", o: ["Chargement paresseux des données", "Chargement lent du système", "Méthode de sauvegarde", "Technique de navigation"], a: 0, s: 5},
+            {q: "Comment
