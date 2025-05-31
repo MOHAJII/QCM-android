@@ -279,7 +279,243 @@
             {q: "Qu'est-ce qu'un Fragment ?", o: ["Une partie d'une Activity", "Un service", "Une base de données", "Un fichier de configuration"], a: 0, s: 1},
             {q: "Quelle permission est nécessaire pour accéder à Internet ?", o: ["INTERNET", "NETWORK_ACCESS", "WEB_ACCESS", "ONLINE_ACCESS"], a: 0, s: 1},
             {q: "Quel composant permet d'exécuter des tâches en arrière-plan ?", o: ["Activity", "Fragment", "Service", "Intent"], a: 2, s: 1},
-            {q: "Comment appelle-t-on le processus de signature d'une application Android ?", o: ["Compilation", "Signing", "Building", "Packaging"], a: 1, s: 1},
+            {q: "Comment gérer les orientations d'écran ?", o: ["onConfigurationChanged()", "onOrientationChanged()", "onScreenRotated()", "onDeviceRotation()"], a: 0, s: 5},
+            {q: "Quel format d'image est le plus efficace ?", o: ["PNG", "JPEG", "WebP", "GIF"], a: 2, s: 5},
+            {q: "Comment éviter les blocages de l'interface ?", o: ["Utiliser des threads d'arrière-plan", "Optimiser le code", "Éviter les opérations longues sur l'UI thread", "Toutes les réponses"], a: 3, s: 5},
+            {q: "Qu'est-ce que le Data Binding ?", o: ["Liaison de données avec l'interface", "Stockage de données", "Transfer de données", "Validation de données"], a: 0, s: 5},
+            {q: "Comment implémenter le Material Design ?", o: ["Material Components", "Design Support Library", "AppCompat", "Custom Views"], a: 0, s: 5},
+            {q: "Qu'est-ce que Jetpack Compose ?", o: ["Un outil de musique", "Un toolkit d'interface utilisateur moderne", "Un gestionnaire de packages", "Un émulateur"], a: 1, s: 5},
+            {q: "Comment gérer les dépendances ?", o: ["Gradle", "Maven", "NPM", "Package Manager"], a: 0, s: 5},
+            {q: "Quelle architecture est recommandée par Google ?", o: ["MVC", "MVP", "MVVM avec Architecture Components", "Clean Architecture"], a: 2, s: 5}
+        ];
+
+        const sectionNames = [
+            "",
+            "Section 1: Bases d'Android",
+            "Section 2: Interface Utilisateur", 
+            "Section 3: Gestion des Données",
+            "Section 4: Services et Composants",
+            "Section 5: Avancé et Optimisation"
+        ];
+
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let score = 0;
+        let sectionScores = [0, 0, 0, 0, 0, 0];
+        let selectedOption = -1;
+
+        function startQuiz() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('quizScreen').style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            const questionNum = currentQuestion + 1;
+            
+            // Update progress
+            const progress = (questionNum / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `Question ${questionNum}/${questions.length}`;
+            
+            // Update section
+            document.getElementById('currentSection').textContent = sectionNames[q.s];
+            
+            // Update question
+            document.getElementById('questionNumber').textContent = `Question ${questionNum}`;
+            document.getElementById('questionText').textContent = q.q;
+            
+            // Update score display
+            document.getElementById('scoreDisplay').textContent = `Score: ${score}/${currentQuestion}`;
+            
+            // Create options
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            q.o.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn option-btn w-100 text-start';
+                btn.innerHTML = `<strong>${String.fromCharCode(97 + index)})</strong> ${option}`;
+                btn.onclick = () => selectOption(index);
+                optionsContainer.appendChild(btn);
+            });
+            
+            // Reset selection
+            selectedOption = -1;
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentQuestion === 0;
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'inline-block';
+            document.getElementById('finishBtn').style.display = currentQuestion === questions.length - 1 ? 'inline-block' : 'none';
+        }
+
+        function selectOption(index) {
+            // Remove previous selections
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Add selection to clicked option
+            document.querySelectorAll('.option-btn')[index].classList.add('selected');
+            
+            selectedOption = index;
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('finishBtn').disabled = false;
+        }
+
+        function nextQuestion() {
+            if (selectedOption === -1) return;
+            
+            // Store answer
+            userAnswers[currentQuestion] = selectedOption;
+            
+            // Check if correct
+            if (selectedOption === questions[currentQuestion].a) {
+                score++;
+                sectionScores[questions[currentQuestion].s]++;
+            }
+            
+            // Show correct answer with animation
+            showAnswerFeedback();
+            
+            setTimeout(() => {
+                currentQuestion++;
+                if (currentQuestion < questions.length) {
+                    loadQuestion();
+                } else {
+                    finishQuiz();
+                }
+            }, 1500);
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                selectedOption = userAnswers[currentQuestion] || -1;
+                loadQuestion();
+                
+                // Restore previous selection
+                if (selectedOption !== -1) {
+                    document.querySelectorAll('.option-btn')[selectedOption].classList.add('selected');
+                    document.getElementById('nextBtn').disabled = false;
+                }
+            }
+        }
+
+        function showAnswerFeedback() {
+            const buttons = document.querySelectorAll('.option-btn');
+            const correctIndex = questions[currentQuestion].a;
+            
+            buttons.forEach((btn, index) => {
+                if (index === correctIndex) {
+                    btn.classList.add('correct');
+                    btn.innerHTML += ' <i class="fas fa-check ms-2"></i>';
+                } else if (index === selectedOption && index !== correctIndex) {
+                    btn.classList.add('incorrect');
+                    btn.innerHTML += ' <i class="fas fa-times ms-2"></i>';
+                }
+                btn.disabled = true;
+            });
+        }
+
+        function finishQuiz() {
+            if (selectedOption !== -1) {
+                userAnswers[currentQuestion] = selectedOption;
+                if (selectedOption === questions[currentQuestion].a) {
+                    score++;
+                    sectionScores[questions[currentQuestion].s]++;
+                }
+            }
+            
+            showResults();
+        }
+
+        function showResults() {
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'block';
+            
+            // Calculate percentage
+            const percentage = Math.round((score / questions.length) * 100);
+            document.getElementById('finalScore').textContent = `${score}/${questions.length} (${percentage}%)`;
+            
+            // Determine level
+            let level = "";
+            let emoji = "";
+            if (score >= 80) {
+                level = "Expert Android";
+                emoji = "🏆";
+            } else if (score >= 60) {
+                level = "Développeur confirmé";
+                emoji = "👨‍💻";
+            } else if (score >= 40) {
+                level = "Développeur intermédiaire";
+                emoji = "📱";
+            } else if (score >= 20) {
+                level = "Débutant avec bases solides";
+                emoji = "📖";
+            } else {
+                level = "Besoin d'approfondir les connaissances";
+                emoji = "📚";
+            }
+            
+            document.getElementById('levelMessage').innerHTML = `${emoji} ${level}`;
+            
+            // Show section scores
+            document.getElementById('section1Score').textContent = `${sectionScores[1]}/20`;
+            document.getElementById('section2Score').textContent = `${sectionScores[2]}/20`;
+            document.getElementById('section3Score').textContent = `${sectionScores[3]}/20`;
+            document.getElementById('section4Score').textContent = `${sectionScores[4]}/20`;
+            document.getElementById('section5Score').textContent = `${sectionScores[5]}/20`;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            userAnswers = [];
+            score = 0;
+            sectionScores = [0, 0, 0, 0, 0, 0];
+            selectedOption = -1;
+            
+            document.getElementById('resultsScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'block';
+        }
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('quizScreen').style.display !== 'none') {
+                if (e.key >= '1' && e.key <= '4') {
+                    const index = parseInt(e.key) - 1;
+                    if (index < questions[currentQuestion].o.length) {
+                        selectOption(index);
+                    }
+                } else if (e.key === 'Enter' && selectedOption !== -1) {
+                    if (currentQuestion === questions.length - 1) {
+                        finishQuiz();
+                    } else {
+                        nextQuestion();
+                    }
+                } else if (e.key === 'ArrowLeft' && currentQuestion > 0) {
+                    previousQuestion();
+                }
+            }
+        });
+
+        // Add smooth animations
+        window.addEventListener('load', function() {
+            document.querySelectorAll('.quiz-container').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    el.style.transition = 'all 0.6s ease';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html> appelle-t-on le processus de signature d'une application Android ?", o: ["Compilation", "Signing", "Building", "Packaging"], a: 1, s: 1},
             {q: "Quel est le format de fichier d'une application Android ?", o: [".exe", ".apk", ".app", ".jar"], a: 1, s: 1},
             {q: "Quelle classe hérite généralement une Activity ?", o: ["AppCompatActivity", "BaseActivity", "MainActivity", "AndroidActivity"], a: 0, s: 1},
             {q: "Où sont stockées les chaînes de caractères dans un projet Android ?", o: ["strings.xml", "text.xml", "values.xml", "content.xml"], a: 0, s: 1},
