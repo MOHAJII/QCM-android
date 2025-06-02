@@ -1,159 +1,21 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QCM Développement Android</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-        }
-        .quiz-container {
-            max-width: 600px;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .question {
-            font-size: 1.2em;
-            margin-bottom: 20px;
-        }
-        .options label {
-            display: block;
-            margin: 10px 0;
-            cursor: pointer;
-        }
-        .options input {
-            margin-right: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #feedback {
-            margin-top: 20px;
-            font-weight: bold;
-        }
-        .correct { color: green; }
-        .incorrect { color: red; }
-    </style>
+    <title>QCM Dashboard</title>
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/main.js" defer></script>
 </head>
 <body>
-    <div class="quiz-container">
-        <div id="question" class="question"></div>
-        <div id="options" class="options"></div>
-        <button id="submit">Soumettre</button>
-        <div id="feedback"></div>
+    <div class="dashboard-container">
+        <h1>Bienvenue sur le portail QCM</h1>
+        <p>Choisissez un module :</p>
+        <div class="modules-list">
+            <a class="module-link" href="modules/mobile.html">Développement Mobile</a>
+            <a class="module-link" href="modules/ai.html">Intelligence Artificielle</a>
+            <!-- Ajoutez d'autres modules ici -->
+        </div>
     </div>
-
-    <script>
-        const questions = [
-            {
-                question: "Quel est le langage de programmation principal recommandé par Google pour le développement Android ?",
-                options: ["Java", "Kotlin", "Python", "JavaScript"],
-                correct: "Kotlin",
-                explanation: "Kotlin est recommandé depuis 2017 pour sa concision et sa sécurité."
-            },
-            {
-                question: "Quel composant Android gère une interface utilisateur à un seul écran ?",
-                options: ["Service", "Activity", "Broadcast Receiver", "Content Provider"],
-                correct: "Activity",
-                explanation: "Une Activity représente un écran avec une interface utilisateur."
-            },
-            // Ajoutez d'autres questions ici (limité à 2 pour la démonstration)
-        ];
-
-        let currentQuestion = 0;
-
-        function loadQuestion() {
-            const q = questions[currentQuestion];
-            document.getElementById('question').textContent = q.question;
-            const optionsDiv = document.getElementById('options');
-            optionsDiv.innerHTML = '';
-            q.options.forEach((option, index) => {
-                const label = document.createElement('label');
-                label.innerHTML = `<input type="radio" name="answer" value="${option}"> ${option}`;
-                optionsDiv.appendChild(label);
-            });
-            document.getElementById('feedback').textContent = '';
-        }
-
-        document.getElementById('submit').addEventListener('click', () => {
-            const selected = document.querySelector('input[name="answer"]:checked');
-            if (!selected) {
-                document.getElementById('feedback').textContent = "Veuillez sélectionner une réponse.";
-                return;
-            }
-            const answer = selected.value;
-            const correct = questions[currentQuestion].correct;
-            const feedback = document.getElementById('feedback');
-            if (answer === correct) {
-                feedback.textContent = `Correct ! ${questions[currentQuestion].explanation}`;
-                feedback.className = 'correct';
-            } else {
-                feedback.textContent = `Incorrect. La réponse correcte est : ${correct}. ${questions[currentQuestion].explanation}`;
-                feedback.className = 'incorrect';
-            }
-            // Passer à la question suivante après 2 secondes
-            setTimeout(() => {
-                currentQuestion = (currentQuestion + 1) % questions.length;
-                loadQuestion();
-            }, 2000);
-        });
-
-        // Charger la première question
-        loadQuestion();
-    </script>
 </body>
 </html>
